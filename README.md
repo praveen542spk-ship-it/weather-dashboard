@@ -9,7 +9,7 @@ ClimaPulse is a real-time, premium weather analytics dashboard built with modern
 1. **Real-Time Weather Queries**: Powered by the public keyless [Open-Meteo API](https://open-meteo.com/), providing detailed data metrics including temperature, high/low records, apparent temperature, humidity, air pressure, UV index, wind speed, wind direction, and sunrise/sunset times.
 2. **Dynamic Aesthetic Backgrounds**: Visually responds to the weather conditions of the selected city (Sunny, Cloudy, Rainy, Snowy, Night-time) with smooth CSS gradient transitions.
 3. **Advanced City Search & Autocomplete**: Integrated with the Open-Meteo Geocoding API. Employs a **350ms debounce mechanism** to optimize API traffic.
-4. **Geolocation Auto-Detection**: Uses the HTML5 Geolocation API to detect coordinates on launch and reverse-geocodes it via Nominatim (OpenStreetMap) to show localized conditions.
+4. **Geolocation Auto-Detection**: Uses the HTML5 Geolocation API to detect coordinates on launch and reverse-geocodes it via Nominatim (OpenStreetMap). It is optimized to resolve precise village-level and settlement names (hamlets, crofts, farms, and local districts) alongside parent cities/counties.
 5. **Interactive Weather Trend Graphs**: Utilizes **Chart.js** to display overlapping smooth line graphs of the 12-hour Temperature and Dew Point forecasts.
 6. **Persistent Bookmarks Sidebar**: Save your favorite cities locally via `localStorage` for rapid selection.
 7. **Bilingual Unit Toggle**: One-click metric/imperial unit converter (Celsius/Kilometers to Fahrenheit/Miles) synced across forecast charts and metrics.

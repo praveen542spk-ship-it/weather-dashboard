@@ -3,6 +3,16 @@
  * Powered by Open-Meteo API
  */
 
+// Register Service Worker for PWA (Installable Mobile App) support
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((reg) => console.log("Service Worker registered successfully:", reg.scope))
+      .catch((err) => console.error("Service Worker registration failed:", err));
+  });
+}
+
 // ============================================================================
 // WMO Weather Code Map (Converts codes to descriptions, icons, and themes)
 // ============================================================================

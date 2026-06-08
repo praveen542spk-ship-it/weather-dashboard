@@ -330,7 +330,7 @@ function triggerGeolocation() {
             const data = await res.json();
             const addr = data.address;
             if (addr) {
-              const precise = addr.neighbourhood || addr.suburb || addr.village || addr.town || addr.city_district;
+              const precise = addr.hamlet || addr.village || addr.neighbourhood || addr.suburb || addr.croft || addr.isolated_dwelling || addr.farm || addr.locality || addr.town || addr.city_district;
               const parent = addr.city || addr.county || addr.state || "";
               
               if (precise && parent && precise !== parent) {

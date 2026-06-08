@@ -1270,15 +1270,10 @@ h1, h2, h3, h4, h5, h6 {
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    justify-content: center;
     border-radius: 10px;
-  }
-  
-  .btn-location span {
-    display: none;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+    gap: 0.35rem;
   }
   
   .toggle-group {

@@ -1,6 +1,6 @@
 {
-  "name": "ClimaPulse Weather",
-  "short_name": "ClimaPulse",
+  "name": "Weather",
+  "short_name": "Weather",
   "description": "A premium, glassmorphic weather analytics dashboard.",
   "start_url": "./index.html",
   "display": "standalone",

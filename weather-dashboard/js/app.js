@@ -74,6 +74,7 @@ const elements = {
   errorTitle: document.getElementById("errorTitle"),
   errorMessage: document.getElementById("errorMessage"),
   errorRetryBtn: document.getElementById("errorRetryBtn"),
+  offlineBadge: document.getElementById("offlineBadge"),
   
   searchForm: document.getElementById("searchForm"),
   searchInput: document.getElementById("searchInput"),
@@ -171,6 +172,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (elements.headerGeoBtn) {
     elements.headerGeoBtn.addEventListener("click", triggerGeolocation);
   }
+  
+  // Connection monitoring listeners
+  window.addEventListener("online", () => {
+    if (elements.offlineBadge) {
+      elements.offlineBadge.classList.add("hidden");
+    }
+    if (state.currentLocation) {
+      loadWeatherForLocation(state.currentLocation, false);
+    }
+  });
+  window.addEventListener("offline", () => {
+    if (elements.offlineBadge) {
+      elements.offlineBadge.classList.remove("hidden");
+    }
+  });
 });
 
 // ============================================================================
@@ -479,13 +495,46 @@ async function loadWeatherForLocation(loc, showSpinner = true) {
   
   // Quick pre-validation for offline mode
   if (!navigator.onLine) {
-    showError("Network Offline", "You are currently disconnected from the internet. Please reconnect and try again.");
+    const cachedLoc = localStorage.getItem("offline_weather_loc");
+    const cachedData = localStorage.getItem("offline_weather_data");
+    
+    if (cachedLoc && cachedData) {
+      const parsedLoc = JSON.parse(cachedLoc);
+      const parsedData = JSON.parse(cachedData);
+      
+      const isInitial = !state.lastWeatherData;
+      const isSameLoc = Math.abs(parsedLoc.lat - loc.lat) < 0.05 && Math.abs(parsedLoc.lon - loc.lon) < 0.05;
+      
+      if (isInitial || isSameLoc) {
+        state.currentLocation = parsedLoc;
+        renderWeather(parsedData);
+        updateFavoriteStarState();
+        
+        if (elements.offlineBadge) {
+          elements.offlineBadge.classList.remove("hidden");
+        }
+        
+        elements.initialLoader.classList.add("hidden");
+        return;
+      }
+    }
+    
+    showError("Network Offline", "You are currently disconnected from the internet. Please reconnect to search other cities.");
     elements.initialLoader.classList.add("hidden");
     return;
   }
 
   try {
     const data = await fetchWeather(loc.lat, loc.lon);
+    
+    // Save to local cache for offline fallback
+    localStorage.setItem("offline_weather_loc", JSON.stringify(loc));
+    localStorage.setItem("offline_weather_data", JSON.stringify(data));
+    
+    if (elements.offlineBadge) {
+      elements.offlineBadge.classList.add("hidden");
+    }
+    
     renderWeather(data);
     updateFavoriteStarState();
     
@@ -493,9 +542,25 @@ async function loadWeatherForLocation(loc, showSpinner = true) {
     updateFavoriteCachedTemp(loc.lat, loc.lon, data.current.temperature_2m);
   } catch (error) {
     console.error("Error loading weather data:", error);
-    showError("Data Fetch Failure", "Unable to retrieve weather metrics for this location. Please try again later.");
+    
+    // Fallback on HTTP request failures
+    const cachedLoc = localStorage.getItem("offline_weather_loc");
+    const cachedData = localStorage.getItem("offline_weather_data");
+    if (cachedLoc && cachedData) {
+      const parsedLoc = JSON.parse(cachedLoc);
+      const parsedData = JSON.parse(cachedData);
+      
+      state.currentLocation = parsedLoc;
+      renderWeather(parsedData);
+      updateFavoriteStarState();
+      
+      if (elements.offlineBadge) {
+        elements.offlineBadge.classList.remove("hidden");
+      }
+    } else {
+      showError("Data Fetch Failure", "Unable to retrieve weather metrics for this location. Please try again later.");
+    }
   } finally {
-    // Fade out main loader
     setTimeout(() => {
       elements.initialLoader.classList.add("hidden");
     }, 400);

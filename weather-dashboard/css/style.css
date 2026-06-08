@@ -1941,3 +1941,26 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: translateX(100vw) scale(var(--scale, 1)); }
 }
 
+/* Offline Indicator Badge */
+.offline-badge {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: var(--red-glow);
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-family: var(--font-family-title);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.75rem;
+  vertical-align: middle;
+  animation: pulseOffline 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulseOffline {
+  0% { opacity: 0.6; box-shadow: 0 0 5px rgba(248, 113, 113, 0.05); }
+  100% { opacity: 1; box-shadow: 0 0 12px rgba(248, 113, 113, 0.18); }
+}
+

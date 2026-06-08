@@ -1,4 +1,4 @@
-const CACHE_NAME = "skyflow-cache-v6";
+const CACHE_NAME = "weather-cache-v7";
 const ASSETS = [
   "./index.html",
   "./css/style.css",

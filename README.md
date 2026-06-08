@@ -1,6 +1,6 @@
-# SkyFlow | Premium Weather Dashboard
+# ClimaPulse | Premium Weather Dashboard
 
-SkyFlow is a real-time, premium weather analytics dashboard built with modern client-side technologies. It features a stunning glassmorphic UI, dynamic weather-based background gradients, interactive trend charts, and real-time location autocompletion suggestions.
+ClimaPulse is a real-time, premium weather analytics dashboard built with modern client-side technologies. It features a stunning glassmorphic UI, dynamic weather-based background gradients, interactive trend charts, and real-time location autocompletion suggestions.
 
 ---
 
@@ -42,7 +42,7 @@ weather-dashboard/
 
 ## 🚀 How to Run Locally
 
-Since SkyFlow is built using client-side vanilla technologies, there are no build steps or bundlers required.
+Since ClimaPulse is built using client-side vanilla technologies, there are no build steps or bundlers required.
 
 ### Method 1: Local HTTP Server (Recommended)
 Running through an HTTP server ensures correct Geolocation API and local storage functionalities.

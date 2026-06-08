@@ -1,4 +1,4 @@
-const CACHE_NAME = "skyflow-cache-v2";
+const CACHE_NAME = "skyflow-cache-v3";
 const ASSETS = [
   "./index.html",
   "./css/style.css",
@@ -9,6 +9,7 @@ const ASSETS = [
 
 // Install Service Worker and cache essential static assets
 self.addEventListener("install", (e) => {
+  self.skipWaiting(); // Force active status immediately
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
@@ -27,20 +28,34 @@ self.addEventListener("activate", (e) => {
           }
         })
       );
+    }).then(() => {
+      return self.clients.claim(); // Take control of open pages immediately
     })
   );
 });
 
-// Fetch events interceptor - serves cached files if offline, otherwise fetches from network
+// Fetch events interceptor - Network First Strategy
 self.addEventListener("fetch", (e) => {
-  // Only handle GET requests and local/CDN assets (ignore Open-Meteo API requests which must be live)
+  // Ignore Open-Meteo API requests which must be live
   if (e.request.method !== "GET" || e.request.url.includes("api.open-meteo.com") || e.request.url.includes("geocoding-api")) {
     return;
   }
   
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
-    })
+    fetch(e.request)
+      .then((networkResponse) => {
+        // If successful, clone response and cache it
+        if (networkResponse && networkResponse.status === 200) {
+          const cacheCopy = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, cacheCopy);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Fallback to cache if offline
+        return caches.match(e.request);
+      })
   );
 });

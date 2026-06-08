@@ -155,8 +155,12 @@ document.addEventListener("DOMContentLoaded", () => {
     elements.errorOverlay.classList.add("hidden");
     loadWeatherForLocation(state.currentLocation);
   });
-  elements.geoBtn.addEventListener("click", triggerGeolocation);
-  elements.headerGeoBtn.addEventListener("click", triggerGeolocation);
+  if (elements.geoBtn) {
+    elements.geoBtn.addEventListener("click", triggerGeolocation);
+  }
+  if (elements.headerGeoBtn) {
+    elements.headerGeoBtn.addEventListener("click", triggerGeolocation);
+  }
 });
 
 // ============================================================================

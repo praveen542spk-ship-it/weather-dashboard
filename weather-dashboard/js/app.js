@@ -630,6 +630,7 @@ function renderWeather(data) {
 function updateBackgroundTheme(themeName) {
   elements.dynamicBg.className = "dynamic-bg";
   elements.dynamicBg.classList.add(themeName);
+  updateWeatherEffects(themeName);
 }
 
 // ============================================================================
@@ -1272,5 +1273,76 @@ function renderComparisonResults(cities, results) {
     });
     elements.compareTableBody.appendChild(tr);
   });
+}
+
+// ============================================================================
+// Dynamic Background Weather Animations & Particles
+// ============================================================================
+function updateWeatherEffects(themeName) {
+  const container = document.getElementById("weatherEffects");
+  if (!container) return;
+  
+  container.innerHTML = ""; // Clear existing animations
+  
+  if (themeName === "rainy") {
+    const dropsCount = 60;
+    for (let i = 0; i < dropsCount; i++) {
+      const drop = document.createElement("div");
+      drop.className = "raindrop";
+      drop.style.left = `${Math.random() * 100}%`;
+      drop.style.animationDuration = `${0.6 + Math.random() * 0.6}s`;
+      drop.style.animationDelay = `${Math.random() * 2}s`;
+      drop.style.height = `${40 + Math.random() * 30}px`;
+      container.appendChild(drop);
+    }
+  } else if (themeName === "snowy") {
+    const flakesCount = 40;
+    for (let i = 0; i < flakesCount; i++) {
+      const flake = document.createElement("div");
+      flake.className = "snowflake";
+      const size = 3 + Math.random() * 4;
+      flake.style.width = `${size}px`;
+      flake.style.height = `${size}px`;
+      flake.style.left = `${Math.random() * 100}%`;
+      flake.style.animationDuration = `${3 + Math.random() * 4}s`;
+      flake.style.animationDelay = `${Math.random() * 5}s`;
+      flake.style.opacity = 0.4 + Math.random() * 0.5;
+      container.appendChild(flake);
+    }
+  } else if (themeName === "night") {
+    const starsCount = 50;
+    for (let i = 0; i < starsCount; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+      const size = 1 + Math.random() * 2;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.animationDuration = `${2 + Math.random() * 3}s`;
+      star.style.animationDelay = `${Math.random() * 4}s`;
+      container.appendChild(star);
+    }
+  } else if (themeName === "sunny") {
+    const sun = document.createElement("div");
+    sun.className = "sun-effect";
+    const ray = document.createElement("div");
+    ray.className = "sun-ray";
+    sun.appendChild(ray);
+    container.appendChild(sun);
+  } else if (themeName === "cloudy") {
+    const blobsCount = 4;
+    for (let i = 0; i < blobsCount; i++) {
+      const blob = document.createElement("div");
+      blob.className = "cloud-blob";
+      const size = 250 + Math.random() * 200;
+      blob.style.width = `${size}px`;
+      blob.style.height = `${size}px`;
+      blob.style.top = `${Math.random() * 40}%`;
+      blob.style.animationDuration = `${25 + Math.random() * 20}s`;
+      blob.style.animationDelay = `${-Math.random() * 25}s`;
+      container.appendChild(blob);
+    }
+  }
 }
 

@@ -42,21 +42,20 @@
             <img src="logo.png" alt="Weather Logo" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover;">
           </div>
           <h1>Weather</h1>
-          <span id="offlineBadge" class="offline-badge hidden"><i data-lucide="wifi-off"></i> Offline</span>
         </div>
         
         <!-- Search & Controls -->
         <div class="controls-container">
           <!-- Prominent Geolocation Button -->
           <button type="button" id="headerGeoBtn" class="btn-location" title="Use Current Geolocation">
-            <i data-lucide="map-pin"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             <span>Use Current Location</span>
           </button>
           
           <div class="search-wrapper">
             <form id="searchForm" autocomplete="off">
               <div class="search-input-group">
-                <i data-lucide="search" class="search-icon"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" id="searchInput" placeholder="Search for cities..." aria-label="Search city">
               </div>
               <!-- Search Suggestions Dropdown -->

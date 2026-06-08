@@ -48,7 +48,10 @@ const state = {
   },
   isFahrenheit: false,
   favorites: [],
-  chartInstance: null
+  chartInstance: null,
+  lastWeatherData: null,
+  selectedDayChartInstance: null,
+  compareChartInstance: null
 };
 
 // ============================================================================
@@ -105,7 +108,35 @@ const elements = {
   sunsetTime: document.getElementById("sunsetTime"),
   
   hourlyCardsContainer: document.getElementById("hourlyCardsContainer"),
-  trendChart: document.getElementById("weatherTrendChart")
+  trendChart: document.getElementById("weatherTrendChart"),
+  
+  // New Navigation and Geolocation elements
+  headerGeoBtn: document.getElementById("headerGeoBtn"),
+  navTabs: document.querySelectorAll(".nav-tab"),
+  pageContents: document.querySelectorAll(".page-content"),
+  
+  // Page 2: 7-Day Forecast Detail Elements
+  forecast7DaySidebar: document.getElementById("forecast7DaySidebar"),
+  dayDetailsPlaceholder: document.getElementById("dayDetailsPlaceholder"),
+  dayDetailsContent: document.getElementById("dayDetailsContent"),
+  selectedDayName: document.getElementById("selectedDayName"),
+  selectedDayBadgeContainer: document.getElementById("selectedDayBadgeContainer"),
+  selectedDayBadgeText: document.getElementById("selectedDayBadgeText"),
+  selectedDayMaxTemp: document.getElementById("selectedDayMaxTemp"),
+  selectedDayMinTemp: document.getElementById("selectedDayMinTemp"),
+  selectedDayUV: document.getElementById("selectedDayUV"),
+  selectedDayPrecip: document.getElementById("selectedDayPrecip"),
+  selectedDayHourlyCards: document.getElementById("selectedDayHourlyCards"),
+  selectedDayTrendChart: document.getElementById("selectedDayTrendChart"),
+  
+  // Page 3: Comparison Elements
+  compareCitySelectors: document.getElementById("compareCitySelectors"),
+  compareBtn: document.getElementById("compareBtn"),
+  compareResults: document.getElementById("compareResults"),
+  comparePlaceholder: document.getElementById("comparePlaceholder"),
+  comparisonChart: document.getElementById("comparisonChart"),
+  compareTableHeader: document.getElementById("compareTableHeader"),
+  compareTableBody: document.getElementById("compareTableBody")
 };
 
 // ============================================================================
@@ -116,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initUnitToggle();
   initSearch();
   initLocation();
+  initRouter();
   
   // Event listeners
   elements.favoriteBtn.addEventListener("click", toggleFavoriteCurrent);
@@ -124,6 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadWeatherForLocation(state.currentLocation);
   });
   elements.geoBtn.addEventListener("click", triggerGeolocation);
+  elements.headerGeoBtn.addEventListener("click", triggerGeolocation);
 });
 
 // ============================================================================
@@ -555,6 +588,15 @@ function renderWeather(data) {
   // --- 7-Day Forecast ---
   render7DayForecast(data);
   
+  // Store fetched weather data into state cache
+  state.lastWeatherData = data;
+  
+  // Render Page 2's detailed forecast list
+  render7DayForecastPageList(data);
+  
+  // Update city compare list checkboxes on Page 3
+  updateCompareCityCheckboxList();
+  
   // Re-instantiate icons
   lucide.createIcons();
 }
@@ -807,3 +849,402 @@ function showError(title, message) {
   elements.errorOverlay.classList.remove("hidden");
   lucide.createIcons();
 }
+
+// ============================================================================
+// Multi-Page SPA Routing Logic
+// ============================================================================
+function initRouter() {
+  elements.navTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const targetId = tab.getAttribute("data-target");
+      
+      // Set active nav tab style
+      elements.navTabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      
+      // Set active page visibility
+      elements.pageContents.forEach((page) => {
+        if (page.id === targetId) {
+          page.classList.add("active");
+        } else {
+          page.classList.remove("active");
+        }
+      });
+      
+      // Force resizing of active Chart.js instances to scale properly
+      if (targetId === "pageToday" && state.chartInstance) {
+        state.chartInstance.resize();
+      } else if (targetId === "page7Day" && state.selectedDayChartInstance) {
+        state.selectedDayChartInstance.resize();
+      } else if (targetId === "pageCompare" && state.compareChartInstance) {
+        state.compareChartInstance.resize();
+      }
+      
+      // Update comparison options if navigating to Compare tab
+      if (targetId === "pageCompare") {
+        updateCompareCityCheckboxList();
+      }
+    });
+  });
+  
+  // Bind Compare Button click
+  elements.compareBtn.addEventListener("click", runComparison);
+}
+
+// ============================================================================
+// Page 2: Detailed 7-Day Forecast Expandable Logic
+// ============================================================================
+function render7DayForecastPageList(data) {
+  elements.forecast7DaySidebar.innerHTML = "";
+  const daily = data.daily;
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(daily.time[i] + 'T00:00:00');
+    const dayName = i === 0 ? "Today" : date.toLocaleDateString('en-US', { weekday: 'long' });
+    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    const maxTemp = Math.round(daily.temperature_2m_max[i]);
+    const minTemp = Math.round(daily.temperature_2m_min[i]);
+    const code = daily.weather_code[i];
+    const weatherInfo = weatherCodeMap[code] || { text: "Cloudy", icon: "cloud" };
+    
+    const card = document.createElement("div");
+    card.className = "day-card-item";
+    card.innerHTML = `
+      <div class="day-card-meta">
+        <span class="day-card-name">${dayName}</span>
+        <span class="day-card-date">${formattedDate}</span>
+      </div>
+      <div class="day-card-status">
+        <i data-lucide="${weatherInfo.icon}"></i>
+        <div class="day-card-temps">
+          <span class="day-card-max">${maxTemp}°</span>
+          <span class="day-card-min">${minTemp}°</span>
+        </div>
+      </div>
+    `;
+    
+    card.addEventListener("click", () => {
+      // Toggle active visual highlight
+      document.querySelectorAll(".day-card-item").forEach(c => c.classList.remove("active"));
+      card.classList.add("active");
+      
+      // Render details in the right side panel
+      renderSelectedDayDetails(i, dayName, formattedDate, weatherInfo);
+    });
+    
+    elements.forecast7DaySidebar.appendChild(card);
+  }
+  
+  // Re-render icons inside sidebar
+  lucide.createIcons();
+}
+
+function renderSelectedDayDetails(dayIndex, dayName, formattedDate, weatherInfo) {
+  elements.dayDetailsPlaceholder.classList.add("hidden");
+  elements.dayDetailsContent.classList.remove("hidden");
+  
+  elements.selectedDayName.textContent = `${dayName}, ${formattedDate}`;
+  elements.selectedDayBadgeContainer.innerHTML = `<i data-lucide="${weatherInfo.icon}"></i> <span id="selectedDayBadgeText">${weatherInfo.text}</span>`;
+  
+  const daily = state.lastWeatherData.daily;
+  const hourly = state.lastWeatherData.hourly;
+  
+  // Populate metrics
+  elements.selectedDayMaxTemp.textContent = `${Math.round(daily.temperature_2m_max[dayIndex])}°`;
+  elements.selectedDayMinTemp.textContent = `${Math.round(daily.temperature_2m_min[dayIndex])}°`;
+  elements.selectedDayUV.textContent = daily.uv_index_max[dayIndex].toFixed(1);
+  elements.selectedDayPrecip.textContent = `${daily.precipitation_sum[dayIndex].toFixed(1)} mm`;
+  
+  // Render hourly cards for the selected day (24 points)
+  elements.selectedDayHourlyCards.innerHTML = "";
+  const startHourIdx = dayIndex * 24;
+  
+  const labels = [];
+  const tempDataset = [];
+  const dewDataset = [];
+  
+  for (let h = 0; h < 24; h++) {
+    const idx = startHourIdx + h;
+    if (idx >= hourly.time.length) break;
+    
+    const time = new Date(hourly.time[idx]);
+    const formattedHour = time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    const temp = Math.round(hourly.temperature_2m[idx]);
+    const code = hourly.weather_code[idx];
+    const isDayCode = time.getHours() > 6 && time.getHours() < 19;
+    const codeDetails = weatherCodeMap[code] || { icon: "cloud" };
+    const activeIcon = isDayCode ? codeDetails.icon : (codeDetails.nightIcon || codeDetails.icon);
+    
+    const hourlyCard = document.createElement("div");
+    hourlyCard.className = "hourly-card";
+    hourlyCard.innerHTML = `
+      <span class="hourly-time">${formattedHour}</span>
+      <i data-lucide="${activeIcon}"></i>
+      <span class="hourly-temp">${temp}°</span>
+    `;
+    elements.selectedDayHourlyCards.appendChild(hourlyCard);
+    
+    // Sample hourly chart points every 2 hours to avoid horizontal cluttering
+    if (h % 2 === 0) {
+      labels.push(formattedHour);
+      tempDataset.push(temp);
+      dewDataset.push(Math.round(hourly.dew_point_2m[idx]));
+    }
+  }
+  
+  // Redraw the selected day's Chart.js trends
+  if (state.selectedDayChartInstance) {
+    state.selectedDayChartInstance.destroy();
+  }
+  
+  const ctx = elements.selectedDayTrendChart.getContext("2d");
+  
+  const tempGradient = ctx.createLinearGradient(0, 0, 0, 200);
+  tempGradient.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+  tempGradient.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+
+  const dewGradient = ctx.createLinearGradient(0, 0, 0, 200);
+  dewGradient.addColorStop(0, 'rgba(167, 139, 250, 0.15)');
+  dewGradient.addColorStop(1, 'rgba(167, 139, 250, 0.0)');
+  
+  state.selectedDayChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Temperature',
+          data: tempDataset,
+          borderColor: '#38bdf8',
+          borderWidth: 2,
+          pointBackgroundColor: '#38bdf8',
+          pointHoverRadius: 6,
+          backgroundColor: tempGradient,
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Dew Point',
+          data: dewDataset,
+          borderColor: '#a78bfa',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointBackgroundColor: '#a78bfa',
+          pointHoverRadius: 6,
+          backgroundColor: dewGradient,
+          fill: true,
+          tension: 0.4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleFont: { family: 'Outfit', size: 12 },
+          bodyFont: { family: 'Inter', size: 12 },
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          padding: 8,
+          displayColors: false,
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label;
+              const value = context.parsed.y;
+              const unit = state.isFahrenheit ? '°F' : '°C';
+              return ` ${label}: ${value}${unit}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } } },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.04)', borderDash: [2, 2] },
+          ticks: {
+            color: '#64748b',
+            font: { family: 'Inter', size: 10 },
+            callback: function(value) { return value + '°'; }
+          }
+        }
+      }
+    }
+  });
+  
+  lucide.createIcons();
+}
+
+// ============================================================================
+// Page 3: Compare Cities Logic (Concurrently Fetches & Compares Bookmarks)
+// ============================================================================
+function updateCompareCityCheckboxList() {
+  elements.compareCitySelectors.innerHTML = "";
+  
+  if (state.favorites.length === 0) {
+    elements.compareCitySelectors.innerHTML = `<p class="empty-favorites" style="text-align: left; padding: 0.5rem 0;">No saved locations available. Please bookmark cities on Today's Dashboard first using the star icon.</p>`;
+    return;
+  }
+  
+  state.favorites.forEach((fav) => {
+    const label = document.createElement("label");
+    label.className = "compare-checkbox-label";
+    label.innerHTML = `
+      <input type="checkbox" value="${fav.name}" data-lat="${fav.lat}" data-lon="${fav.lon}">
+      <span>${fav.name}</span>
+    `;
+    
+    const checkbox = label.querySelector("input");
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        label.classList.add("selected");
+      } else {
+        label.classList.remove("selected");
+      }
+    });
+    
+    elements.compareCitySelectors.appendChild(label);
+  });
+}
+
+async function runComparison() {
+  const selectedCheckboxes = elements.compareCitySelectors.querySelectorAll("input:checked");
+  
+  if (selectedCheckboxes.length < 2) {
+    showError("Comparison Choice Needed", "Please select at least 2 saved cities from the checklist to run a side-by-side comparison.");
+    return;
+  }
+  
+  elements.initialLoader.classList.remove("hidden");
+  elements.comparePlaceholder.classList.add("hidden");
+  elements.compareResults.classList.add("hidden");
+  
+  const citiesToFetch = Array.from(selectedCheckboxes).map(cb => ({
+    name: cb.value,
+    lat: parseFloat(cb.getAttribute("data-lat")),
+    lon: parseFloat(cb.getAttribute("data-lon"))
+  }));
+  
+  try {
+    // Run network calls concurrently
+    const weatherResults = await Promise.all(
+      citiesToFetch.map(city => fetchWeather(city.lat, city.lon))
+    );
+    
+    renderComparisonResults(citiesToFetch, weatherResults);
+  } catch (err) {
+    console.error("Comparison fetch error:", err);
+    showError("Comparison Fetch Error", "Unable to download weather metrics for the compared cities. Please try again.");
+  } finally {
+    elements.initialLoader.classList.add("hidden");
+  }
+}
+
+function renderComparisonResults(cities, results) {
+  elements.compareResults.classList.remove("hidden");
+  
+  const cityNames = cities.map(c => c.name);
+  const temps = results.map(r => Math.round(r.current.temperature_2m));
+  const humidities = results.map(r => Math.round(r.current.relative_humidity_2m));
+  const windSpeeds = results.map(r => Math.round(r.current.wind_speed_10m));
+  
+  // Render Chart.js comparison bar chart
+  if (state.compareChartInstance) {
+    state.compareChartInstance.destroy();
+  }
+  
+  const ctx = elements.comparisonChart.getContext("2d");
+  state.compareChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: cityNames,
+      datasets: [
+        {
+          label: 'Temperature',
+          data: temps,
+          backgroundColor: 'rgba(56, 189, 248, 0.75)',
+          borderColor: '#38bdf8',
+          borderWidth: 1,
+          borderRadius: 6
+        },
+        {
+          label: 'Humidity (%)',
+          data: humidities,
+          backgroundColor: 'rgba(167, 139, 250, 0.75)',
+          borderColor: '#a78bfa',
+          borderWidth: 1,
+          borderRadius: 6
+        },
+        {
+          label: 'Wind Speed',
+          data: windSpeeds,
+          backgroundColor: 'rgba(74, 222, 128, 0.75)',
+          borderColor: '#4ade80',
+          borderWidth: 1,
+          borderRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleFont: { family: 'Outfit', size: 12 },
+          bodyFont: { family: 'Inter', size: 12 },
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.04)', borderDash: [2, 2] },
+          ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } }
+        }
+      }
+    }
+  });
+  
+  // Populate details table dynamically
+  elements.compareTableHeader.innerHTML = "<th>Metric</th>";
+  cities.forEach(c => {
+    const th = document.createElement("th");
+    th.textContent = c.name;
+    elements.compareTableHeader.appendChild(th);
+  });
+  
+  const tempUnit = state.isFahrenheit ? "°F" : "°C";
+  const windUnit = state.isFahrenheit ? "mph" : "km/h";
+  
+  const metricsRows = [
+    { name: "Current Temp", values: results.map(r => `${Math.round(r.current.temperature_2m)}${tempUnit}`) },
+    { name: "Feels Like", values: results.map(r => `${Math.round(r.current.apparent_temperature)}${tempUnit}`) },
+    { name: "Humidity", values: results.map(r => `${Math.round(r.current.relative_humidity_2m)}%`) },
+    { name: "Wind Speed", values: results.map(r => `${Math.round(r.current.wind_speed_10m)} ${windUnit}`) },
+    { name: "Air Pressure", values: results.map(r => `${Math.round(r.current.pressure_msl)} hPa`) },
+    { name: "Condition", values: results.map(r => {
+        const code = r.current.weather_code;
+        return weatherCodeMap[code] ? weatherCodeMap[code].text : "Cloudy";
+      })
+    }
+  ];
+  
+  elements.compareTableBody.innerHTML = "";
+  metricsRows.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${row.name}</td>`;
+    row.values.forEach(val => {
+      const td = document.createElement("td");
+      td.textContent = val;
+      tr.appendChild(td);
+    });
+    elements.compareTableBody.appendChild(tr);
+  });
+}
+

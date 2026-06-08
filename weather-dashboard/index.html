@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyFlow | Premium Weather Dashboard</title>
+  <meta name="description" content="A real-time, premium Weather Dashboard displaying accurate, live weather metrics (temperature, dew point, humidity, wind, and forecast trends) powered by open APIs.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Dynamic Dynamic Background Gradients -->
+  <div class="dynamic-bg" id="dynamicBg"></div>
+  <div class="glass-overlay"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">
+          <i data-lucide="cloud-lightning"></i>
+        </div>
+        <h1>SkyFlow</h1>
+      </div>
+      
+      <!-- Search & Controls -->
+      <div class="controls-container">
+        <div class="search-wrapper">
+          <form id="searchForm" autocomplete="off">
+            <div class="search-input-group">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="searchInput" placeholder="Search for cities..." aria-label="Search city">
+              <button type="button" id="geoBtn" class="geo-btn" title="Use Current Location">
+                <i data-lucide="map-pin"></i>
+              </button>
+            </div>
+            <!-- Search Suggestions Dropdown -->
+            <div id="suggestionsDropdown" class="suggestions-dropdown hidden"></div>
+          </form>
+        </div>
+
+        <div class="toggle-group">
+          <!-- Temp Unit Toggle (C / F) -->
+          <label class="switch-toggle" id="unitToggleLabel">
+            <input type="checkbox" id="unitToggle">
+            <span class="slider-round">
+              <span class="unit-c">°C</span>
+              <span class="unit-f">°F</span>
+            </span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+      
+      <!-- LEFT COLUMN: Main Weather, Bookmarked Locations, and 7-day Forecast -->
+      <div class="left-column">
+        <!-- Main Weather Card -->
+        <section class="card main-weather-card" id="mainWeatherCard">
+          <div class="card-loader-skeleton hidden" id="mainWeatherSkeleton">
+            <div class="skeleton-row skeleton-header"></div>
+            <div class="skeleton-row skeleton-temp"></div>
+            <div class="skeleton-row skeleton-text"></div>
+          </div>
+          
+          <div class="main-weather-content" id="mainWeatherContent">
+            <div class="weather-meta">
+              <div class="location-details">
+                <div class="city-name-group">
+                  <h2 id="cityName">Loading Location...</h2>
+                  <button type="button" id="favoriteBtn" class="favorite-btn" title="Save to favorites">
+                    <i data-lucide="star" class="star-icon"></i>
+                  </button>
+                </div>
+                <p id="currentDate">Friday, June 5</p>
+              </div>
+              <div class="weather-badge" id="weatherBadge">
+                <i data-lucide="cloud"></i>
+                <span id="weatherText">Partly Cloudy</span>
+              </div>
+            </div>
+
+            <div class="temp-display-group">
+              <div class="temp-main">
+                <span id="currentTemp">--</span><span class="temp-degree">°</span>
+              </div>
+              <div class="temp-high-low">
+                <span><i data-lucide="arrow-up" class="txt-red"></i> H: <span id="tempMax">--</span>°</span>
+                <span><i data-lucide="arrow-down" class="txt-blue"></i> L: <span id="tempMin">--</span>°</span>
+              </div>
+            </div>
+
+            <div class="feels-like-container">
+              <p>Feels like <strong id="feelsLike">--</strong>° • <span id="weatherSummaryDesc">Checking conditions...</span></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bookmarked Locations Panel -->
+        <section class="card favorites-card">
+          <h3>Saved Locations</h3>
+          <div class="favorites-list" id="favoritesList">
+            <p class="empty-favorites">No saved locations yet. Click the star icon next to a city to bookmark it.</p>
+          </div>
+        </section>
+
+        <!-- 7-Day Forecast Card -->
+        <section class="card daily-forecast-card">
+          <h3>7-Day Forecast</h3>
+          <div class="card-loader-skeleton hidden" id="dailyForecastSkeleton">
+            <div class="skeleton-row skeleton-list-item"></div>
+            <div class="skeleton-row skeleton-list-item"></div>
+            <div class="skeleton-row skeleton-list-item"></div>
+            <div class="skeleton-row skeleton-list-item"></div>
+            <div class="skeleton-row skeleton-list-item"></div>
+          </div>
+          <div class="daily-forecast-list" id="dailyForecastList">
+            <!-- Dynamic Injection of Days -->
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: Detailed Metrics Grid & Chart Section -->
+      <div class="right-column">
+        <!-- Detailed Metrics Grid -->
+        <section class="metrics-grid">
+          
+          <!-- Wind Card -->
+          <div class="card metric-card" id="metricWind">
+            <div class="metric-header">
+              <span class="metric-title">WIND</span>
+              <i data-lucide="wind"></i>
+            </div>
+            <div class="metric-body">
+              <div class="wind-info">
+                <div class="metric-value"><span id="windSpeed">--</span> <span class="metric-unit">km/h</span></div>
+                <div class="metric-label" id="windDirectionText">North</div>
+              </div>
+              <!-- Wind Compass Graphic -->
+              <div class="compass-wrapper">
+                <div class="compass">
+                  <div class="compass-pointer" id="compassPointer"></div>
+                  <div class="compass-label north">N</div>
+                  <div class="compass-label east">E</div>
+                  <div class="compass-label south">S</div>
+                  <div class="compass-label west">W</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Humidity Card -->
+          <div class="card metric-card" id="metricHumidity">
+            <div class="metric-header">
+              <span class="metric-title">HUMIDITY</span>
+              <i data-lucide="droplet"></i>
+            </div>
+            <div class="metric-body-flex">
+              <div class="metric-value"><span id="humidity">--</span><span class="metric-unit">%</span></div>
+              <div class="metric-desc">
+                The dew point is currently <span id="dewPointVal">--</span>°
+              </div>
+              <!-- Custom Gauge Bar -->
+              <div class="gauge-bar-wrapper">
+                <div class="gauge-bar">
+                  <div class="gauge-bar-fill" id="humidityGaugeFill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UV Index Card -->
+          <div class="card metric-card" id="metricUV">
+            <div class="metric-header">
+              <span class="metric-title">UV INDEX</span>
+              <i data-lucide="sun"></i>
+            </div>
+            <div class="metric-body-flex">
+              <div class="metric-value"><span id="uvIndex">--</span></div>
+              <div class="metric-label font-bold" id="uvLevel">Low</div>
+              <div class="uv-slider-wrapper">
+                <div class="uv-slider">
+                  <div class="uv-slider-indicator" id="uvSliderIndicator" style="left: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Air Pressure Card -->
+          <div class="card metric-card" id="metricPressure">
+            <div class="metric-header">
+              <span class="metric-title">PRESSURE</span>
+              <i data-lucide="gauge"></i>
+            </div>
+            <div class="metric-body-flex">
+              <div class="metric-value"><span id="pressure">--</span> <span class="metric-unit">hPa</span></div>
+              <div class="metric-label" id="pressureText">Normal</div>
+              <p class="metric-desc">Atmospheric weight adjusted to sea level.</p>
+            </div>
+          </div>
+
+          <!-- Precipitation Probability Card -->
+          <div class="card metric-card" id="metricPrecip">
+            <div class="metric-header">
+              <span class="metric-title">PRECIPITATION</span>
+              <i data-lucide="cloud-rain"></i>
+            </div>
+            <div class="metric-body-flex">
+              <div class="metric-value"><span id="precipProb">--</span><span class="metric-unit">%</span></div>
+              <div class="metric-label" id="precipText">No rain forecast today</div>
+              <!-- Gauge for Rain -->
+              <div class="gauge-bar-wrapper">
+                <div class="gauge-bar">
+                  <div class="gauge-bar-fill" id="precipGaugeFill" style="width: 0%; background: var(--blue-glow)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sunrise / Sunset Card -->
+          <div class="card metric-card" id="metricSun">
+            <div class="metric-header">
+              <span class="metric-title">SUNRISE & SUNSET</span>
+              <i data-lucide="sunset"></i>
+            </div>
+            <div class="metric-body-flex">
+              <div class="sun-times">
+                <div class="sun-time-row">
+                  <span class="sun-label"><i data-lucide="sunrise"></i> Sunrise:</span>
+                  <span class="sun-value" id="sunriseTime">--:-- AM</span>
+                </div>
+                <div class="sun-time-row">
+                  <span class="sun-label"><i data-lucide="sunset"></i> Sunset:</span>
+                  <span class="sun-value" id="sunsetTime">--:-- PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Hourly Forecast & Chart Section -->
+        <section class="card forecast-trend-card">
+          <div class="trend-header">
+            <h3>Hourly Forecast (24h)</h3>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot temp-dot"></span> Temperature</span>
+              <span class="legend-item"><span class="legend-dot dew-dot"></span> Dew Point</span>
+            </div>
+          </div>
+
+          <!-- Scrollable Hourly Forecast Cards -->
+          <div class="hourly-cards-container" id="hourlyCardsContainer">
+            <!-- Dynamically populated cards -->
+          </div>
+
+          <!-- Interactive Trend Chart -->
+          <div class="chart-container">
+            <canvas id="weatherTrendChart"></canvas>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- Error State Overlay -->
+    <div class="error-overlay hidden" id="errorOverlay">
+      <div class="error-card glass">
+        <div class="error-icon">
+          <i data-lucide="alert-triangle"></i>
+        </div>
+        <h2 id="errorTitle">Oops! Something went wrong</h2>
+        <p id="errorMessage">Unable to fetch weather data. Please check your internet connection or try searching for another city.</p>
+        <button type="button" class="btn-primary" id="errorRetryBtn">
+          <i data-lucide="refresh-cw"></i> Try Again
+        </button>
+      </div>
+    </div>
+
+    <!-- Initial Loading Overlay -->
+    <div class="initial-loader" id="initialLoader">
+      <div class="loader-content">
+        <div class="spinner">
+          <i data-lucide="cloud-lightning" class="spinner-icon"></i>
+        </div>
+        <p>Detecting your location & loading weather data...</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer-note">
+      <p>Data provided by Open-Meteo &bull; Dashboard designed in 2026</p>
+    </footer>
+  </div>
+
+  <!-- App Main Code -->
+  <script src="js/app.js"></script>
+</body>
+</html>

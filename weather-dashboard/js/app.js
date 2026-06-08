@@ -318,7 +318,19 @@ function triggerGeolocation() {
           });
           if (res.ok) {
             const data = await res.json();
-            cityName = data.address.city || data.address.town || data.address.village || data.address.suburb || "Current Location";
+            const addr = data.address;
+            if (addr) {
+              const precise = addr.neighbourhood || addr.suburb || addr.village || addr.town || addr.city_district;
+              const parent = addr.city || addr.county || addr.state || "";
+              
+              if (precise && parent && precise !== parent) {
+                cityName = `${precise}, ${parent}`;
+              } else {
+                cityName = precise || parent || "Current Location";
+              }
+            } else {
+              cityName = "Current Location";
+            }
           }
         } catch (e) {
           console.warn("Reverse geocoding failed, falling back to label 'Current Location'", e);

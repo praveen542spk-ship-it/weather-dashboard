@@ -45,12 +45,16 @@
   padding: 0;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   font-family: var(--font-family-body);
   background-color: var(--bg-dark);
   color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
   position: relative;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -125,7 +129,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 1.5rem;
   margin-top: 1.5rem;
   flex-grow: 1;
@@ -1201,12 +1205,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Tablet View */
 @media (max-width: 1024px) {
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   
   .left-column {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 1rem;
   }
   
@@ -1222,7 +1226,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Custom Mobile split */
 @media (max-width: 768px) {
   .left-column {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   
   .favorites-card, .daily-forecast-card {
@@ -1264,6 +1268,6 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   .metrics-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

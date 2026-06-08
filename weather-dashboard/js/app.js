@@ -1282,6 +1282,7 @@ function updateWeatherEffects(themeName) {
   const container = document.getElementById("weatherEffects");
   if (!container) return;
   
+  container.className = "weather-effects " + themeName;
   container.innerHTML = ""; // Clear existing animations
   
   if (themeName === "rainy") {
@@ -1294,6 +1295,19 @@ function updateWeatherEffects(themeName) {
       drop.style.animationDelay = `${Math.random() * 2}s`;
       drop.style.height = `${50 + Math.random() * 30}px`;
       container.appendChild(drop);
+    }
+    
+    // Dark storm clouds drifting behind the rain
+    const cloudsCount = 6;
+    for (let i = 0; i < cloudsCount; i++) {
+      const cloud = document.createElement("div");
+      cloud.className = "fluffy-cloud";
+      cloud.style.top = `${Math.random() * 50}%`;
+      cloud.style.left = `${-250}px`;
+      cloud.style.setProperty('--scale', 0.5 + Math.random() * 0.7);
+      cloud.style.animationDuration = `${30 + Math.random() * 25}s`;
+      cloud.style.animationDelay = `${-Math.random() * 50}s`;
+      container.appendChild(cloud);
     }
   } else if (themeName === "snowy") {
     const flakesCount = 75;
@@ -1308,6 +1322,19 @@ function updateWeatherEffects(themeName) {
       flake.style.animationDelay = `${Math.random() * 5}s`;
       flake.style.opacity = 0.5 + Math.random() * 0.5;
       container.appendChild(flake);
+    }
+    
+    // Snow clouds drifting
+    const cloudsCount = 5;
+    for (let i = 0; i < cloudsCount; i++) {
+      const cloud = document.createElement("div");
+      cloud.className = "fluffy-cloud";
+      cloud.style.top = `${Math.random() * 45}%`;
+      cloud.style.left = `${-250}px`;
+      cloud.style.setProperty('--scale', 0.5 + Math.random() * 0.8);
+      cloud.style.animationDuration = `${35 + Math.random() * 20}s`;
+      cloud.style.animationDelay = `${-Math.random() * 50}s`;
+      container.appendChild(cloud);
     }
   } else if (themeName === "night") {
     const starsCount = 75;
@@ -1328,10 +1355,26 @@ function updateWeatherEffects(themeName) {
     sun.className = "sun-effect";
     const ray = document.createElement("div");
     ray.className = "sun-ray";
+    const sunBody = document.createElement("div");
+    sunBody.className = "sun-body";
     sun.appendChild(ray);
+    sun.appendChild(sunBody);
     container.appendChild(sun);
+    
+    // Fluffy white clouds at the bottom like the picture
+    const cloudsCount = 4;
+    for (let i = 0; i < cloudsCount; i++) {
+      const cloud = document.createElement("div");
+      cloud.className = "fluffy-cloud";
+      cloud.style.bottom = `${8 + Math.random() * 12}%`;
+      cloud.style.left = `${-15 + i * 35 + Math.random() * 8}%`;
+      cloud.style.setProperty('--scale', 0.5 + Math.random() * 0.6);
+      cloud.style.animationDuration = `${30 + Math.random() * 15}s`;
+      cloud.style.animationDelay = `${-Math.random() * 30}s`;
+      container.appendChild(cloud);
+    }
   } else if (themeName === "cloudy") {
-    const blobsCount = 6;
+    const blobsCount = 5;
     for (let i = 0; i < blobsCount; i++) {
       const blob = document.createElement("div");
       blob.className = "cloud-blob";
@@ -1342,6 +1385,19 @@ function updateWeatherEffects(themeName) {
       blob.style.animationDuration = `${20 + Math.random() * 20}s`;
       blob.style.animationDelay = `${-Math.random() * 20}s`;
       container.appendChild(blob);
+    }
+    
+    // Drifting overcast clouds
+    const cloudsCount = 8;
+    for (let i = 0; i < cloudsCount; i++) {
+      const cloud = document.createElement("div");
+      cloud.className = "fluffy-cloud";
+      cloud.style.top = `${Math.random() * 65}%`;
+      cloud.style.left = `${-250}px`;
+      cloud.style.setProperty('--scale', 0.6 + Math.random() * 0.8);
+      cloud.style.animationDuration = `${25 + Math.random() * 25}s`;
+      cloud.style.animationDelay = `${-Math.random() * 45}s`;
+      container.appendChild(cloud);
     }
   }
 }

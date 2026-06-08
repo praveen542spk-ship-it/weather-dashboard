@@ -26,7 +26,7 @@
   
   /* Dynamic Background Gradients */
   --grad-default: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
-  --grad-sunny: linear-gradient(135deg, #1e3a8a 0%, #0284c7 35%, #0ea5e9 70%, #f97316 100%);
+  --grad-sunny: linear-gradient(135deg, #0284c7 0%, #0ea5e9 40%, #38bdf8 75%, #bae6fd 100%);
   --grad-rainy: linear-gradient(135deg, #0b132b 0%, #1c2541 40%, #3a506b 70%, #1d3557 100%);
   --grad-snowy: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #475569 75%, #e2e8f0 100%);
   --grad-cloudy: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
@@ -1776,43 +1776,128 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: translateX(100vw); }
 }
 
-/* Sunny Sun-Ray Effect */
+/* Sunny Sun-Ray Effect (Bright White Core with Sharp Rays like the user image) */
 .sun-effect {
   position: absolute;
-  top: -120px;
-  right: -120px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, rgba(234, 179, 8, 0.18) 45%, rgba(234, 179, 8, 0) 70%);
-  border-radius: 50%;
+  top: 100px;
+  left: 12%;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
-  animation: pulseSun 6s ease-in-out infinite;
-  box-shadow: 0 0 120px rgba(253, 224, 71, 0.25);
+}
+
+.sun-body {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  background: #ffffff;
+  border-radius: 50%;
+  filter: blur(0.5px);
+  box-shadow: 
+    0 0 40px #ffffff,
+    0 0 80px rgba(253, 224, 71, 0.95),
+    0 0 160px rgba(234, 179, 8, 0.7);
+  animation: pulseSunBody 6s ease-in-out infinite alternate;
+}
+
+@keyframes pulseSunBody {
+  0% { transform: scale(0.9); box-shadow: 0 0 35px #ffffff, 0 0 70px rgba(253, 224, 71, 0.85), 0 0 140px rgba(234, 179, 8, 0.6); }
+  100% { transform: scale(1.05); box-shadow: 0 0 45px #ffffff, 0 0 95px rgba(253, 224, 71, 1), 0 0 190px rgba(234, 179, 8, 0.8); }
 }
 
 .sun-ray {
   position: absolute;
-  top: 50%;
-  left: 50%;
   width: 2200px;
   height: 2200px;
-  margin-top: -1100px;
-  margin-left: -1100px;
   background: repeating-conic-gradient(
     from 0deg,
-    rgba(253, 224, 71, 0.08) 0deg 15deg,
-    rgba(253, 224, 71, 0) 15deg 30deg
+    rgba(255, 255, 255, 0.16) 0deg 1.2deg,
+    rgba(255, 255, 255, 0) 1.2deg 15deg
   );
   border-radius: 50%;
-  animation: rotateSun 80s linear infinite;
+  animation: rotateSun 90s linear infinite;
 }
 
 @keyframes rotateSun {
   to { transform: rotate(360deg); }
 }
 
-@keyframes pulseSun {
-  0%, 100% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.08); opacity: 1; }
+/* Fluffy Clouds (Drifting and swaying background layers) */
+.fluffy-cloud {
+  position: absolute;
+  width: 170px;
+  height: 60px;
+  background: #ffffff;
+  border-radius: 50px;
+  opacity: 0.85;
+  filter: blur(0.5px) drop-shadow(0 8px 20px rgba(255, 255, 255, 0.25));
+  transform: scale(var(--scale, 1));
+  pointer-events: none;
+}
+
+.fluffy-cloud::before {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: inherit;
+  border-radius: 50%;
+  top: -40px;
+  left: 25px;
+}
+
+.fluffy-cloud::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: inherit;
+  border-radius: 50%;
+  top: -25px;
+  right: 25px;
+}
+
+/* Sunny theme fluffy clouds sway gently at the bottom */
+.weather-effects.sunny .fluffy-cloud {
+  animation: swayCloud 30s ease-in-out infinite alternate;
+  background: #ffffff;
+  opacity: 0.8;
+}
+
+@keyframes swayCloud {
+  from { transform: translate(0, 0) scale(var(--scale, 1)); }
+  to { transform: translate(50px, -6px) scale(var(--scale, 1)); }
+}
+
+/* Cloudy theme clouds drift across the entire screen and are greyish */
+.weather-effects.cloudy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #e2e8f0 0%, #cbd5e1 100%);
+  opacity: 0.7;
+  filter: blur(1px) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15));
+}
+
+/* Rainy theme dark storm clouds drifting */
+.weather-effects.rainy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #475569 0%, #1e293b 100%);
+  opacity: 0.55;
+  filter: blur(1.5px) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+/* Snowy theme white/gray snow clouds drifting */
+.weather-effects.snowy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);
+  opacity: 0.65;
+  filter: blur(1.2px) drop-shadow(0 8px 18px rgba(255, 255, 255, 0.18));
+}
+
+@keyframes driftCloud {
+  from { transform: translateX(-250px) scale(var(--scale, 1)); }
+  to { transform: translateX(100vw) scale(var(--scale, 1)); }
 }
 

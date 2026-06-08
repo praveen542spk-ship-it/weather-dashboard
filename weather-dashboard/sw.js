@@ -1,4 +1,4 @@
-const CACHE_NAME = "skyflow-cache-v4";
+const CACHE_NAME = "skyflow-cache-v5";
 const ASSETS = [
   "./index.html",
   "./css/style.css",

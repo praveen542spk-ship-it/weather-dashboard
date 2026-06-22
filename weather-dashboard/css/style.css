@@ -326,6 +326,7 @@ h1, h2, h3, h4, h5, h6 {
   max-height: 250px;
   overflow-y: auto;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .suggestions-dropdown.hidden {

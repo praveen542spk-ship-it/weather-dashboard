@@ -123,8 +123,8 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   z-index: -2;
   background: radial-gradient(circle at 50% 50%, rgba(9, 13, 22, 0.1) 0%, rgba(9, 13, 22, 0.5) 100%);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 /* ==========================================
@@ -169,8 +169,8 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 20px;
   padding: 1.5rem;
   box-shadow: var(--glass-glow);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
@@ -208,8 +208,8 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(9, 13, 22, 0.4);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   box-shadow: var(--glass-glow);
 }
 
@@ -239,6 +239,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.75rem;
   background: linear-gradient(135deg, #ffffff, #94a3b8);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -325,8 +326,8 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 100;
   max-height: 250px;
   overflow-y: auto;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .suggestions-dropdown.hidden {
@@ -1074,8 +1075,8 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
   transition: opacity 0.3s ease;
 }
 

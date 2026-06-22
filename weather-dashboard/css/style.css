@@ -197,6 +197,8 @@ h1, h2, h3, h4, h5, h6 {
    Header Styles
    ========================================== */
 .app-header {
+  position: relative;
+  z-index: 50;
   display: flex;
   justify-content: space-between;
   align-items: center;

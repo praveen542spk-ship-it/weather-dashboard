@@ -26,11 +26,14 @@
   
   /* Dynamic Background Gradients */
   --grad-default: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
-  --grad-sunny: linear-gradient(135deg, #0284c7 0%, #0ea5e9 40%, #38bdf8 75%, #bae6fd 100%);
-  --grad-rainy: linear-gradient(135deg, #0b132b 0%, #1c2541 40%, #3a506b 70%, #1d3557 100%);
-  --grad-snowy: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #475569 75%, #e2e8f0 100%);
-  --grad-cloudy: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  --grad-night: linear-gradient(135deg, #020617 0%, #0b0f19 40%, #1e1b4b 80%, #311042 100%);
+  --grad-sunny-day: linear-gradient(135deg, #0284c7 0%, #0ea5e9 40%, #38bdf8 75%, #bae6fd 100%);
+  --grad-sunny-night: linear-gradient(135deg, #020617 0%, #0b0f19 40%, #1e1b4b 80%, #311042 100%);
+  --grad-cloudy-day: linear-gradient(135deg, #0ea5e9 0%, #7dd3fc 45%, #e0f2fe 80%, #f1f5f9 100%);
+  --grad-cloudy-night: linear-gradient(135deg, #020617 0%, #090d16 50%, #1e293b 100%);
+  --grad-rainy-day: linear-gradient(135deg, #384259 0%, #52616b 40%, #c9d6df 80%, #f0f5f9 100%);
+  --grad-rainy-night: linear-gradient(135deg, #020617 0%, #0b0f19 40%, #0f172a 80%, #1e293b 100%);
+  --grad-snowy-day: linear-gradient(135deg, #7dd3fc 0%, #cbd5e1 45%, #e2e8f0 80%, #ffffff 100%);
+  --grad-snowy-night: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e293b 100%);
   
   --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --transition-fast: all 0.2s ease-in-out;
@@ -96,11 +99,21 @@ h1, h2, h3, h4, h5, h6 {
   transition: var(--transition-smooth);
 }
 
-.dynamic-bg.sunny { background: var(--grad-sunny); }
-.dynamic-bg.rainy { background: var(--grad-rainy); }
-.dynamic-bg.snowy { background: var(--grad-snowy); }
-.dynamic-bg.cloudy { background: var(--grad-cloudy); }
-.dynamic-bg.night { background: var(--grad-night); }
+.dynamic-bg.day.sunny { background: var(--grad-sunny-day); }
+.dynamic-bg.night.sunny { background: var(--grad-sunny-night); }
+.dynamic-bg.day.rainy { background: var(--grad-rainy-day); }
+.dynamic-bg.night.rainy { background: var(--grad-rainy-night); }
+.dynamic-bg.day.snowy { background: var(--grad-snowy-day); }
+.dynamic-bg.night.snowy { background: var(--grad-snowy-night); }
+.dynamic-bg.day.cloudy { background: var(--grad-cloudy-day); }
+.dynamic-bg.night.cloudy { background: var(--grad-cloudy-night); }
+
+/* Fallbacks */
+.dynamic-bg.sunny { background: var(--grad-sunny-day); }
+.dynamic-bg.rainy { background: var(--grad-rainy-day); }
+.dynamic-bg.snowy { background: var(--grad-snowy-day); }
+.dynamic-bg.cloudy { background: var(--grad-cloudy-day); }
+.dynamic-bg.night { background: var(--grad-sunny-night); }
 
 .glass-overlay {
   position: fixed;
@@ -1909,15 +1922,43 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: translate(50px, -6px) scale(var(--scale, 1)); }
 }
 
-/* Cloudy theme clouds drift across the entire screen and are greyish */
+/* Cloudy theme clouds drift across the entire screen and are greyish/white during the day and dark slate/navy-grey at night */
+.weather-effects.day.cloudy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #ffffff 0%, #cbd5e1 100%);
+  opacity: 0.85;
+  filter: blur(1px) drop-shadow(0 10px 25px rgba(255, 255, 255, 0.2));
+}
+
+.weather-effects.night.cloudy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #334155 0%, #1e293b 100%);
+  opacity: 0.5;
+  filter: blur(2px) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
 .weather-effects.cloudy .fluffy-cloud {
   animation: driftCloud linear infinite;
-  background: linear-gradient(to bottom, #e2e8f0 0%, #cbd5e1 100%);
-  opacity: 0.7;
-  filter: blur(1px) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15));
+  background: linear-gradient(to bottom, #ffffff 0%, #cbd5e1 100%);
+  opacity: 0.8;
+  filter: blur(1px) drop-shadow(0 10px 25px rgba(255, 255, 255, 0.2));
 }
 
 /* Rainy theme dark storm clouds drifting */
+.weather-effects.day.rainy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #475569 0%, #1e293b 100%);
+  opacity: 0.65;
+  filter: blur(1.5px) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+.weather-effects.night.rainy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+  opacity: 0.4;
+  filter: blur(2px) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
 .weather-effects.rainy .fluffy-cloud {
   animation: driftCloud linear infinite;
   background: linear-gradient(to bottom, #475569 0%, #1e293b 100%);
@@ -1926,6 +1967,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Snowy theme white/gray snow clouds drifting */
+.weather-effects.day.snowy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);
+  opacity: 0.75;
+  filter: blur(1.2px) drop-shadow(0 8px 18px rgba(255, 255, 255, 0.18));
+}
+
+.weather-effects.night.snowy .fluffy-cloud {
+  animation: driftCloud linear infinite;
+  background: linear-gradient(to bottom, #334155 0%, #1e293b 100%);
+  opacity: 0.45;
+  filter: blur(2px) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
 .weather-effects.snowy .fluffy-cloud {
   animation: driftCloud linear infinite;
   background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);

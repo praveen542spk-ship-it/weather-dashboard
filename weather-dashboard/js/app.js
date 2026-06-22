@@ -613,7 +613,7 @@ function renderWeather(data) {
   const activeIcon = isDay ? codeInfo.icon : (codeInfo.nightIcon || codeInfo.icon);
   
   // Update Dynamic Theme background
-  updateBackgroundTheme(isDay ? codeInfo.theme : "night");
+  updateBackgroundTheme(codeInfo.theme, isDay);
   
   // Header Meta
   elements.cityName.textContent = state.currentLocation.name;
@@ -692,10 +692,14 @@ function renderWeather(data) {
   lucide.createIcons();
 }
 
-function updateBackgroundTheme(themeName) {
+function updateBackgroundTheme(themeName, isDay) {
   elements.dynamicBg.className = "dynamic-bg";
-  elements.dynamicBg.classList.add(themeName);
-  updateWeatherEffects(themeName);
+  if (isDay) {
+    elements.dynamicBg.classList.add("day", themeName);
+  } else {
+    elements.dynamicBg.classList.add("night", themeName);
+  }
+  updateWeatherEffects(themeName, isDay);
 }
 
 // ============================================================================
@@ -1343,13 +1347,39 @@ function renderComparisonResults(cities, results) {
 // ============================================================================
 // Dynamic Background Weather Animations & Particles
 // ============================================================================
-function updateWeatherEffects(themeName) {
+function updateWeatherEffects(themeName, isDay) {
   const container = document.getElementById("weatherEffects");
   if (!container) return;
   
-  container.className = "weather-effects " + themeName;
+  container.className = "weather-effects " + themeName + " " + (isDay ? "day" : "night");
   container.innerHTML = ""; // Clear existing animations
   
+  // 1. Render Stars if it's night
+  if (!isDay) {
+    let starsCount = 0;
+    if (themeName === "sunny") {
+      starsCount = 75; // Clear night
+    } else if (themeName === "cloudy") {
+      starsCount = 15; // Cloudy night, a few stars peeking through
+    } else if (themeName === "snowy") {
+      starsCount = 5;  // Snowy night, faint stars
+    }
+    
+    for (let i = 0; i < starsCount; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+      const size = 1.2 + Math.random() * 2;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.animationDuration = `${1.5 + Math.random() * 2.5}s`;
+      star.style.animationDelay = `${Math.random() * 3}s`;
+      container.appendChild(star);
+    }
+  }
+  
+  // 2. Render theme-specific weather animations
   if (themeName === "rainy") {
     const dropsCount = 95;
     for (let i = 0; i < dropsCount; i++) {
@@ -1362,7 +1392,7 @@ function updateWeatherEffects(themeName) {
       container.appendChild(drop);
     }
     
-    // Dark storm clouds drifting behind the rain
+    // Storm clouds drifting behind the rain
     const cloudsCount = 6;
     for (let i = 0; i < cloudsCount; i++) {
       const cloud = document.createElement("div");
@@ -1401,42 +1431,31 @@ function updateWeatherEffects(themeName) {
       cloud.style.animationDelay = `${-Math.random() * 50}s`;
       container.appendChild(cloud);
     }
-  } else if (themeName === "night") {
-    const starsCount = 75;
-    for (let i = 0; i < starsCount; i++) {
-      const star = document.createElement("div");
-      star.className = "star";
-      const size = 1.2 + Math.random() * 2;
-      star.style.width = `${size}px`;
-      star.style.height = `${size}px`;
-      star.style.left = `${Math.random() * 100}%`;
-      star.style.top = `${Math.random() * 100}%`;
-      star.style.animationDuration = `${1.5 + Math.random() * 2.5}s`;
-      star.style.animationDelay = `${Math.random() * 3}s`;
-      container.appendChild(star);
-    }
   } else if (themeName === "sunny") {
-    const sun = document.createElement("div");
-    sun.className = "sun-effect";
-    const ray = document.createElement("div");
-    ray.className = "sun-ray";
-    const sunBody = document.createElement("div");
-    sunBody.className = "sun-body";
-    sun.appendChild(ray);
-    sun.appendChild(sunBody);
-    container.appendChild(sun);
-    
-    // Fluffy white clouds at the bottom like the picture
-    const cloudsCount = 4;
-    for (let i = 0; i < cloudsCount; i++) {
-      const cloud = document.createElement("div");
-      cloud.className = "fluffy-cloud";
-      cloud.style.bottom = `${8 + Math.random() * 12}%`;
-      cloud.style.left = `${-15 + i * 35 + Math.random() * 8}%`;
-      cloud.style.setProperty('--scale', 0.5 + Math.random() * 0.6);
-      cloud.style.animationDuration = `${30 + Math.random() * 15}s`;
-      cloud.style.animationDelay = `${-Math.random() * 30}s`;
-      container.appendChild(cloud);
+    // Only render sun disc and rays if it is day!
+    if (isDay) {
+      const sun = document.createElement("div");
+      sun.className = "sun-effect";
+      const ray = document.createElement("div");
+      ray.className = "sun-ray";
+      const sunBody = document.createElement("div");
+      sunBody.className = "sun-body";
+      sun.appendChild(ray);
+      sun.appendChild(sunBody);
+      container.appendChild(sun);
+      
+      // Fluffy white clouds at the bottom like the picture
+      const cloudsCount = 4;
+      for (let i = 0; i < cloudsCount; i++) {
+        const cloud = document.createElement("div");
+        cloud.className = "fluffy-cloud";
+        cloud.style.bottom = `${8 + Math.random() * 12}%`;
+        cloud.style.left = `${-15 + i * 35 + Math.random() * 8}%`;
+        cloud.style.setProperty('--scale', 0.5 + Math.random() * 0.6);
+        cloud.style.animationDuration = `${30 + Math.random() * 15}s`;
+        cloud.style.animationDelay = `${-Math.random() * 30}s`;
+        container.appendChild(cloud);
+      }
     }
   } else if (themeName === "cloudy") {
     const blobsCount = 5;
